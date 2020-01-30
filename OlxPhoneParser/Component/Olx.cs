@@ -42,11 +42,11 @@ namespace OlxPhoneParser.Component
             Thread thread = new Thread(() =>
             {
                 int lastZn = 0;
-                while (lastZn < _allLinks.Count && threadCount!=0)
+                while (lastZn+5 <= _allLinks.Count && threadCount!=0)
                 {
-                    if (lastZn != currentPosition-threadCount)
+                    if (lastZn != currentPosition-5)
                     {
-                        lastZn = currentPosition- threadCount;
+                        lastZn = currentPosition- 5;
                         if (lastZn > 0)
                         {
                             _debugConsole.WriteLine($"Обработано {lastZn} из {_allLinks.Count} ссылок.");
@@ -78,10 +78,10 @@ namespace OlxPhoneParser.Component
         }
         private void ParsAllAdLinks(int endPage)
         {
-            for (int i = endPage-1; endPage>=i; i++)
+            for (int i = 1; endPage>=i; i++)
             {
                 ReqParametres req = new ReqParametres($"{_category}&page={i}");
-                req.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36");
+                req.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36"); //
                 LinkParser linkParser = new LinkParser(req.Request);
                 List<string> allRawLinks = linkParser.Data.Replace("\n", "").ParsRegex("<h3 class=\"lheight22 margintop5\">(.*?)class=", 1);
                 List<string> allLinks = new List<string>();
@@ -122,14 +122,14 @@ namespace OlxPhoneParser.Component
             proxy.Kind = ProxyKind.Manual;
             proxy.IsAutoDetect = false;
             proxy.HttpProxy =
-            proxy.SslProxy = externalProxy;
+            proxy.SslProxy = Proxies.GetProxy();
             options.AddArgument("ignore-certificate-errors");
             options.PageLoadStrategy = PageLoadStrategy.Eager;
             options.AddArguments(new List<string>() { "no-sandbox", "disable-gpu" });
             options.Proxy = proxy;
             IWebDriver webDriver = new ChromeDriver(driverService,options);
-            webDriver.Manage().Window.Minimize();
-            webDriver.Manage().Window.Position = new Point(-2000, 0);
+            //webDriver.Manage().Window.Minimize();
+            //webDriver.Manage().Window.Position = new Point(-2000, 0);
             int workLink = currentPosition++;
             while (workLink < _allLinks.Count)
             {
@@ -140,8 +140,6 @@ namespace OlxPhoneParser.Component
                     {
                         throw new Exception();
                     }
-                    //var cookieAlert = webDriver.FindElement(By.CssSelector(".cookie-close.abs.cookiesBarClose"));
-                    //cookieAlert.Click();
 
                     IWebElement phone = null;
                     IWebElement name = null;
@@ -188,7 +186,6 @@ namespace OlxPhoneParser.Component
                         if (!allInfo.ContainsKey(newPhone))
                         {
                             allInfo.Add(newPhone, newName);
-                            _debugConsole.WriteLine("Crowl: "+newPhone + ":" + newName);
                         }
                     });
                     workLink = currentPosition++;
@@ -201,13 +198,13 @@ namespace OlxPhoneParser.Component
                     proxy.Kind = ProxyKind.Manual;
                     proxy.IsAutoDetect = false;
                     proxy.HttpProxy =
-                    proxy.SslProxy = GetValidProxy();
+                    proxy.SslProxy = Proxies.GetProxy();
                     options.AddArgument("ignore-certificate-errors");
                     options.AddArguments(new List<string>() { "no-sandbox", "disable-gpu" });
                     options.Proxy = proxy;
                     webDriver = new ChromeDriver(driverService,options);
-                    webDriver.Manage().Window.Position = new Point(-2000, 0);
-                    webDriver.Manage().Window.Minimize();
+                    //webDriver.Manage().Window.Position = new Point(-2000, 0);
+                    //webDriver.Manage().Window.Minimize();
                 }
             }
             threadCount--;

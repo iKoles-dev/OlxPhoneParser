@@ -41,8 +41,9 @@ namespace OlxPhoneParser
 
         private void StartBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (!LinkField.Text.Equals(""))
+            if (!LinkField.Text.Equals("")&&!BestProxies.Text.Equals(""))
             {
+                Proxies.bestProxyKey = BestProxies.Text;
                 Olx olx = new Olx(LinkField.Text, DebugBox);
                 Thread thread = new Thread(() =>
                 {
@@ -50,6 +51,10 @@ namespace OlxPhoneParser
                 });
                 thread.IsBackground = true;
                 thread.Start();
+            }
+            if (BestProxies.Text.Equals(""))
+            {
+                DebugBox.WriteLine("Вы не ввели прокси-ключ!");
             }
         }
     }

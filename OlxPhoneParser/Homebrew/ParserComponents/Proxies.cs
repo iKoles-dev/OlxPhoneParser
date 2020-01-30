@@ -10,7 +10,7 @@ namespace Homebrew
     public static class Proxies
     {
         public static List<string> allProxies = new List<string>();
-        private static string bestProxyKey = "216587427b836ee30016dfdc00a1012c";
+        public static string bestProxyKey = "";
 
         public static string GetProxy()
         {
