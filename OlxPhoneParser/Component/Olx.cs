@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -22,6 +24,7 @@ namespace OlxPhoneParser.Component
         private string _category;
         private List<string> _allLinks = new List<string>();
         private Dictionary<string, string> allInfo = new Dictionary<string, string>();
+        private int threadCount = 0;
         public Olx(string category, RichTextBox debugConsole)
         {
             _debugConsole = debugConsole;
@@ -38,7 +41,27 @@ namespace OlxPhoneParser.Component
             ParsAllInfo();
             Thread thread = new Thread(() =>
             {
-
+                int lastZn = 0;
+                while (lastZn < _allLinks.Count && threadCount!=0)
+                {
+                    if (lastZn != currentPosition-threadCount)
+                    {
+                        lastZn = currentPosition- threadCount;
+                        if (lastZn > 0)
+                        {
+                            _debugConsole.WriteLine($"Обработано {lastZn} из {_allLinks.Count} ссылок.");
+                        }
+                    }
+                    Thread.Sleep(1000);
+                }
+                string allPhones = "";
+                foreach (var item in allInfo)
+                {
+                    allPhones += item.Key + ":" + item.Value + "\n";
+                }
+                string curDate = DateTime.Now.Month + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute;
+                File.WriteAllText(Directory.GetCurrentDirectory() + "/" + curDate+ ".txt", allPhones);
+                _debugConsole.WriteLine("Парсинг завершён!\nСохранено в: "+ Directory.GetCurrentDirectory() + "/" + curDate + ".txt");
             });
             thread.IsBackground = true;
             thread.Start();
@@ -77,8 +100,9 @@ namespace OlxPhoneParser.Component
         int currentPosition = 0;
         private void ParsAllInfo()
         {
-            for (int i = 0; 10>i; i++)
+            for (int i = 0; 5>i; i++)
             {
+                threadCount++;
                 Thread thread = new Thread(() =>
                 {
                     string proxy = GetValidProxy();
@@ -105,6 +129,7 @@ namespace OlxPhoneParser.Component
             options.Proxy = proxy;
             IWebDriver webDriver = new ChromeDriver(driverService,options);
             webDriver.Manage().Window.Minimize();
+            webDriver.Manage().Window.Position = new Point(-2000, 0);
             int workLink = currentPosition++;
             while (workLink < _allLinks.Count)
             {
@@ -158,12 +183,12 @@ namespace OlxPhoneParser.Component
                     List<string> allPhones = new List<string>(phone.Text.Split('\n'));
                     allPhones.ForEach(ph =>
                     {
-                        ph.Replace("\n", "");
-                        realName.Replace("\n", "");
-                        if (!allInfo.ContainsKey(ph))
+                        string newPhone = ph.Replace("\n", "").Replace("\r","");
+                        string newName = realName.Replace("\n", "").Replace("\r", "");
+                        if (!allInfo.ContainsKey(newPhone))
                         {
-                            allInfo.Add(ph, realName);
-                            _debugConsole.WriteLine(ph + " : " + realName);
+                            allInfo.Add(newPhone, newName);
+                            _debugConsole.WriteLine("Crowl: "+newPhone + ":" + newName);
                         }
                     });
                     workLink = currentPosition++;
@@ -176,15 +201,16 @@ namespace OlxPhoneParser.Component
                     proxy.Kind = ProxyKind.Manual;
                     proxy.IsAutoDetect = false;
                     proxy.HttpProxy =
-                    proxy.SslProxy = externalProxy;
+                    proxy.SslProxy = GetValidProxy();
                     options.AddArgument("ignore-certificate-errors");
                     options.AddArguments(new List<string>() { "no-sandbox", "disable-gpu" });
                     options.Proxy = proxy;
                     webDriver = new ChromeDriver(driverService,options);
+                    webDriver.Manage().Window.Position = new Point(-2000, 0);
                     webDriver.Manage().Window.Minimize();
                 }
             }
-            
+            threadCount--;
             webDriver?.Quit();
         }
         private string GetValidProxy()
