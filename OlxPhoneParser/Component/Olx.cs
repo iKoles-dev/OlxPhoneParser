@@ -25,19 +25,33 @@ namespace OlxPhoneParser.Component
         private List<string> _allLinks = new List<string>();
         private Dictionary<string, string> allInfo = new Dictionary<string, string>();
         private int threadCount = 0;
-        public Olx(string category, RichTextBox debugConsole)
+        private bool _isNew = false;
+        public Olx(string category, RichTextBox debugConsole, bool isNew)
         {
+            _isNew = isNew;
             _debugConsole = debugConsole;
             _category = category;
         }
         public void StartParsing()
         {
-            _debugConsole.WriteLine("Начинаем парсинг указанной категории.");
-            _category = _category.Contains("?") ? _category + "&search%5Bfilter_enum_state%5D%5B0%5D=new" : _category + "?search%5Bfilter_enum_state%5D%5B0%5D=new";
-            int endPage = GetEndPage();
-            _debugConsole.WriteLine($"Для парсинга доступно: {endPage.ToString()} страниц.");
-            ParsAllAdLinks(endPage);
-            _debugConsole.WriteLine($"Все категории спаршены.\nНайдено {_allLinks.Count} ссылок.\nНачинаем парсинг всех объявлений.");
+            List<string> categories = new List<string>(_category.Replace("\r","").Split('\n'));
+            categories.ForEach(category =>
+            {
+                _debugConsole.WriteLine($"Начинаем парсинг категории: {category}");
+                if (_isNew)
+                {
+                    _category = category.Contains("?") ? category + "&search%5Bfilter_enum_state%5D%5B0%5D=new" : category + "?search%5Bfilter_enum_state%5D%5B0%5D=new";
+                }
+                else
+                {
+                    _category = category;
+                }
+                int endPage = GetEndPage(category);
+                _debugConsole.WriteLine($"Для парсинга доступно: {endPage.ToString()} страниц.");
+                ParsAllAdLinks(endPage,category);
+                _debugConsole.WriteLine($"Категория {category} спаршена.\nВсего найдено {_allLinks.Count} ссылок.");
+            });
+            _debugConsole.WriteLine($"Начинаем парсинг телефонов.");
             ParsAllInfo();
             Thread thread = new Thread(() =>
             {
@@ -67,21 +81,28 @@ namespace OlxPhoneParser.Component
             thread.IsBackground = true;
             thread.Start();
         }
-        private int GetEndPage()
+        private int GetEndPage(string category)
         {
-            ReqParametres req = new ReqParametres(_category);
+            ReqParametres req = new ReqParametres(category);
             req.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36");
             LinkParser linkParser = new LinkParser(req.Request);
             List<string> allLinks = linkParser.Data.ParsRegex("<a class=\"block br3 brc8 large tdnone lheight24\" href=\"(.*?)\"",1);
-            string lastLink = allLinks[allLinks.Count - 1];
-            int lastNumber = int.Parse(lastLink.ParsFromToEnd("page="));
-            return lastNumber;
+            if (allLinks.Count > 0)
+            {
+                string lastLink = allLinks[allLinks.Count - 1];
+                int lastNumber = int.Parse(lastLink.ParsFromToEnd("page="));
+                return lastNumber;
+            }
+            else
+            {
+                return 0;
+            }
         }
-        private void ParsAllAdLinks(int endPage)
+        private void ParsAllAdLinks(int endPage, string category)
         {
             for (int i = 1; endPage>=i; i++)
             {
-                ReqParametres req = new ReqParametres($"{_category}&page={i}");
+                ReqParametres req = new ReqParametres($"{category}" + (category.Contains("?") ? "&page={i}" : "?page={i}"));
                 req.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36"); //
                 LinkParser linkParser = new LinkParser(req.Request);
                 List<string> allRawLinks = linkParser.Data.Replace("\n", "").ParsRegex("<h3 class=\"lheight22 margintop5\">(.*?)class=", 1);

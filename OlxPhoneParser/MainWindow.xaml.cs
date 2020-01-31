@@ -44,7 +44,7 @@ namespace OlxPhoneParser
             if (!LinkField.Text.Equals("")&&!BestProxies.Text.Equals(""))
             {
                 Proxies.bestProxyKey = BestProxies.Text;
-                Olx olx = new Olx(LinkField.Text, DebugBox);
+                Olx olx = new Olx(LinkField.Text, DebugBox,IsNew.IsEnabled);
                 Thread thread = new Thread(() =>
                 {
                     olx.StartParsing();

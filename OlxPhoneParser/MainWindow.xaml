@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:OlxPhoneParser"
         mc:Ignorable="d"
-        Title="[t.me/i_Koles]" Height="460" Width="600"
+        Title="[t.me/i_Koles]" Height="560" Width="600"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -21,12 +21,13 @@
         <RichTextBox x:Name="DebugBox" Height="210" Margin="0,50,0,0" VerticalAlignment="Top" FontSize="14" Block.LineHeight="6" Background="#33ECCECE" FontWeight="Bold" Foreground="#DDFFFFFF" BorderBrush="#897AFF0B" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Padding="0" UseLayoutRounding="False">
             <FlowDocument/>
         </RichTextBox>
-        <Button x:Name="StartBtn" Content="Старт" HorizontalAlignment="Left" Margin="210,405,0,0" VerticalAlignment="Top" Width="180" Click="StartBtn_Click" Height="45"/>
+        <Button x:Name="StartBtn" Content="Старт" HorizontalAlignment="Left" Margin="60,495,0,0" VerticalAlignment="Top" Width="180" Click="StartBtn_Click" Height="45"/>
         <Label Content="OLX Parser" HorizontalAlignment="Left" Margin="265,10,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="LinkField" HorizontalAlignment="Left" Height="38" Margin="0,290,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="600" Background="#33FFFFFF" HorizontalContentAlignment="Center" FontSize="16" CaretBrush="White" VerticalContentAlignment="Center"/>
-        <Label Content="Введите ссылку на категорию" HorizontalAlignment="Left" Margin="200,265,0,0" VerticalAlignment="Top"/>
-        <Label Content="Введите ключ Best-Proxies" HorizontalAlignment="Left" Margin="200,333,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="BestProxies" HorizontalAlignment="Left" Height="38" Margin="0,358,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="600" Background="#33FFFFFF" HorizontalContentAlignment="Center" FontSize="16" CaretBrush="White" VerticalContentAlignment="Center"/>
+        <TextBox Margin="0,290,0,0" VerticalAlignment="Top" x:Name="LinkField" TextWrapping="Wrap" Background="#33FFFFFF" HorizontalContentAlignment="Right" FontSize="16" CaretBrush="White" VerticalContentAlignment="Center" AcceptsReturn="True" Height="95" VerticalScrollBarVisibility="Visible" HorizontalAlignment="Left" Width="600" HorizontalScrollBarVisibility="Disabled" UseLayoutRounding="False"/>
+        <Label Content="Введите ссылки на категории" HorizontalAlignment="Left" Margin="200,265,0,0" VerticalAlignment="Top"/>
+        <Label Content="Введите ключ Best-Proxies" HorizontalAlignment="Left" Margin="200,405,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="BestProxies" HorizontalAlignment="Left" Height="38" Margin="0,430,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="600" Background="#33FFFFFF" HorizontalContentAlignment="Center" FontSize="16" CaretBrush="White" VerticalContentAlignment="Center"/>
+        <CheckBox x:Name="IsNew" Content="Поиск среди новых" HorizontalAlignment="Left" Margin="320,502,0,0" VerticalAlignment="Top" FontSize="20" FontWeight="Normal"/>
     </Grid>
 
 
