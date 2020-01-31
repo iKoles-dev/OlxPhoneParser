@@ -102,7 +102,7 @@ namespace OlxPhoneParser.Component
         {
             for (int i = 1; endPage>=i; i++)
             {
-                ReqParametres req = new ReqParametres($"{category}" + (category.Contains("?") ? "&page={i}" : "?page={i}"));
+                ReqParametres req = new ReqParametres($"{category}" + (category.Contains("?") ? $"&page={i}" : $"?page={i}"));
                 req.SetUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.53 Safari/537.36"); //
                 LinkParser linkParser = new LinkParser(req.Request);
                 List<string> allRawLinks = linkParser.Data.Replace("\n", "").ParsRegex("<h3 class=\"lheight22 margintop5\">(.*?)class=", 1);
