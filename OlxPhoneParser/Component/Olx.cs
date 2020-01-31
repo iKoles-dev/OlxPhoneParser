@@ -42,7 +42,7 @@ namespace OlxPhoneParser.Component
             Thread thread = new Thread(() =>
             {
                 int lastZn = 0;
-                while (lastZn+5 <= _allLinks.Count && threadCount!=0)
+                while (lastZn <= _allLinks.Count && threadCount!=0)
                 {
                     if (lastZn != currentPosition-5)
                     {
@@ -54,14 +54,15 @@ namespace OlxPhoneParser.Component
                     }
                     Thread.Sleep(1000);
                 }
-                string allPhones = "";
-                foreach (var item in allInfo)
-                {
-                    allPhones += item.Key + ":" + item.Value + "\n";
-                }
-                string curDate = DateTime.Now.Month + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute;
-                File.WriteAllText(Directory.GetCurrentDirectory() + "/" + curDate+ ".txt", allPhones);
-                _debugConsole.WriteLine("Парсинг завершён!\nСохранено в: "+ Directory.GetCurrentDirectory() + "/" + curDate + ".txt");
+                CreateExcel();
+                //string allPhones = "";
+                //foreach (var item in allInfo)
+                //{
+                //    allPhones += item.Key + ":" + item.Value + "\n";
+                //}
+                //string curDate = DateTime.Now.Month + "-" + DateTime.Now.Hour + "-" + DateTime.Now.Minute;
+                //File.WriteAllText(Directory.GetCurrentDirectory() + "/" + curDate+ ".txt", allPhones);
+                //_debugConsole.WriteLine("Парсинг завершён!\nСохранено в: "+ Directory.GetCurrentDirectory() + "/" + curDate + ".txt");
             });
             thread.IsBackground = true;
             thread.Start();
@@ -240,6 +241,41 @@ namespace OlxPhoneParser.Component
             }
             return proxy;
 
+        }
+        private void CreateExcel()
+        {
+            try
+            {
+                _debugConsole.WriteLine("Начинаем составление таблицы\n");
+                Microsoft.Office.Interop.Excel.Application workbook = new Microsoft.Office.Interop.Excel.Application();
+                workbook.Workbooks.Add();
+                Microsoft.Office.Interop.Excel._Worksheet workSheet = (Microsoft.Office.Interop.Excel.Worksheet)workbook.ActiveSheet;
+                workSheet.Name = "OLX";
+
+                //Создаём заголовки полей
+                workSheet.Cells[1, 1] = "Телефон";
+                workSheet.Cells[1, 2] = "Имя";
+                for (int i = 0; allInfo.Count > i; i++)
+                {
+                    workSheet.Cells[i + 2, 1] = allInfo.ElementAt(i).Key;
+                    workSheet.Cells[i + 2, 2] = allInfo.ElementAt(i).Value;
+                }
+
+                for (int i = 1; i < 2; i++)
+                {
+                    workSheet.Columns[i].AutoFit();
+                }
+                Microsoft.Office.Interop.Excel.Range formatRange;
+                formatRange = workSheet.get_Range("a1", "a" + allInfo.Count + 1);
+                formatRange.NumberFormat = "@";
+                workSheet.SaveAs($"{Environment.CurrentDirectory}\\Phones_{DateTime.Now.Hour}h{DateTime.Now.Minute}m{DateTime.Now.Second}s.xlsx");
+                workbook.Visible = true;
+                workSheet = null;
+                workbook = null;
+
+                _debugConsole.WriteLine("Создание таблицы завершено успешно!\n");
+            }
+            catch (Exception) { }
         }
     }
 }
